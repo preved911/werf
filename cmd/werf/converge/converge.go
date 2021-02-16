@@ -10,8 +10,8 @@ import (
 
 	"github.com/werf/werf/pkg/giterminism_manager"
 
-	"github.com/werf/werf/pkg/deploy/helm/command_helpers"
-	"github.com/werf/werf/pkg/deploy/helm/maintenance_helper"
+	"github.com/werf/werf/pkg/deploy/helm/v3/command_helpers"
+	"github.com/werf/werf/pkg/deploy/helm/v3/maintenance_helper"
 
 	cmd_helm "helm.sh/helm/v3/cmd/helm"
 	"helm.sh/helm/v3/pkg/action"
@@ -27,7 +27,7 @@ import (
 	"github.com/werf/werf/cmd/werf/common"
 	"github.com/werf/werf/pkg/build"
 	"github.com/werf/werf/pkg/container_runtime"
-	"github.com/werf/werf/pkg/deploy/helm/chart_extender"
+	"github.com/werf/werf/pkg/deploy/helm/v3/chart_extender"
 	"github.com/werf/werf/pkg/deploy/lock_manager"
 	"github.com/werf/werf/pkg/deploy/secrets_manager"
 	"github.com/werf/werf/pkg/docker"

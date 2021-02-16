@@ -5,7 +5,7 @@ import (
 
 	"github.com/werf/werf/pkg/deploy/secrets_manager"
 
-	"github.com/werf/werf/pkg/deploy/helm/chart_extender"
+	"github.com/werf/werf/pkg/deploy/helm/v3/chart_extender"
 
 	"github.com/spf13/cobra"
 	cmd_werf_common "github.com/werf/werf/cmd/werf/common"

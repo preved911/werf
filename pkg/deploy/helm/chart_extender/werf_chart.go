@@ -23,8 +23,8 @@ import (
 	"helm.sh/helm/v3/pkg/cli"
 
 	"github.com/werf/werf/pkg/config"
-	"github.com/werf/werf/pkg/deploy/helm"
-	"github.com/werf/werf/pkg/deploy/helm/command_helpers"
+	"github.com/werf/werf/pkg/deploy/helm/v3"
+	"github.com/werf/werf/pkg/deploy/helm/v3/command_helpers"
 	"github.com/werf/werf/pkg/giterminism_manager"
 	"github.com/werf/werf/pkg/util/secretvalues"
 )

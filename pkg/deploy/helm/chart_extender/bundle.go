@@ -14,13 +14,13 @@ import (
 
 	"helm.sh/helm/v3/pkg/chartutil"
 
-	"github.com/werf/werf/pkg/deploy/helm/command_helpers"
+	"github.com/werf/werf/pkg/deploy/helm/v3/command_helpers"
 
 	"helm.sh/helm/v3/pkg/chart/loader"
 
 	"helm.sh/helm/v3/pkg/cli"
 
-	"github.com/werf/werf/pkg/deploy/helm"
+	"github.com/werf/werf/pkg/deploy/helm/v3"
 
 	"helm.sh/helm/v3/pkg/chart"
 )

@@ -8,7 +8,7 @@ import (
 
 	"github.com/werf/werf/pkg/werf"
 
-	"github.com/werf/werf/pkg/deploy/helm/chart_extender"
+	"github.com/werf/werf/pkg/deploy/helm/v3/chart_extender"
 
 	helm_secret_decrypt "github.com/werf/werf/cmd/werf/helm/secret/decrypt"
 	helm_secret_encrypt "github.com/werf/werf/cmd/werf/helm/secret/encrypt"
@@ -22,7 +22,7 @@ import (
 	helm_secret_values_encrypt "github.com/werf/werf/cmd/werf/helm/secret/values/encrypt"
 
 	"github.com/werf/kubedog/pkg/kube"
-	"github.com/werf/werf/pkg/deploy/helm"
+	"github.com/werf/werf/pkg/deploy/helm/v3"
 
 	"helm.sh/helm/v3/pkg/action"
 	"helm.sh/helm/v3/pkg/chart"

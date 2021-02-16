@@ -93,6 +93,11 @@ func (helper *MaintenanceHelper) getResourcesFactory() (util.Factory, error) {
 	return util.NewFactory(configGetter), nil
 }
 
+func (helper *MaintenanceHelper) CheckHelm3StorageAvailable(ctx context.Context) (bool, error) {
+	_, err := helper.GetHelm3ReleasesList(ctx)
+	return err == nil, nil
+}
+
 func (helper *MaintenanceHelper) CheckHelm2StorageAvailable(ctx context.Context) (bool, error) {
 	storage, err := helper.initHelm2Storage()
 	if err != nil {

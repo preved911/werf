@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/werf/werf/pkg/deploy/helm/command_helpers"
+	"github.com/werf/werf/pkg/deploy/helm/v3/command_helpers"
 
 	"github.com/spf13/cobra"
 
@@ -15,8 +15,8 @@ import (
 	"github.com/werf/logboek"
 
 	"github.com/werf/werf/cmd/werf/common"
-	"github.com/werf/werf/pkg/deploy/helm"
-	"github.com/werf/werf/pkg/deploy/helm/chart_extender"
+	"github.com/werf/werf/pkg/deploy/helm/v3"
+	"github.com/werf/werf/pkg/deploy/helm/v3/chart_extender"
 	"github.com/werf/werf/pkg/deploy/lock_manager"
 	"github.com/werf/werf/pkg/docker"
 	"github.com/werf/werf/pkg/git_repo"

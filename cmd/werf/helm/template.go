@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/werf/werf/pkg/deploy/helm/chart_extender"
+	"github.com/werf/werf/pkg/deploy/helm/v3/chart_extender"
 
 	"github.com/spf13/cobra"
 	"github.com/werf/werf/cmd/werf/common"

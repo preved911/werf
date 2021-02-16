@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/werf/werf/pkg/deploy/helm/command_helpers"
+	"github.com/werf/werf/pkg/deploy/helm/v3/command_helpers"
 
 	"github.com/werf/werf/pkg/deploy/lock_manager"
 
-	"github.com/werf/werf/pkg/deploy/helm/chart_extender"
+	"github.com/werf/werf/pkg/deploy/helm/v3/chart_extender"
 
 	"helm.sh/helm/v3/pkg/cli/values"
 
@@ -20,7 +20,7 @@ import (
 
 	"github.com/werf/werf/pkg/werf/global_warnings"
 
-	"github.com/werf/werf/pkg/deploy/helm"
+	"github.com/werf/werf/pkg/deploy/helm/v3"
 
 	cmd_helm "helm.sh/helm/v3/cmd/helm"
 	"helm.sh/helm/v3/pkg/action"

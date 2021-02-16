@@ -6,7 +6,7 @@ import (
 
 	"github.com/werf/kubedog/pkg/kube"
 
-	"github.com/werf/werf/pkg/deploy/helm"
+	"github.com/werf/werf/pkg/deploy/helm/v3"
 	cmd_helm "helm.sh/helm/v3/cmd/helm"
 	"helm.sh/helm/v3/pkg/action"
 )

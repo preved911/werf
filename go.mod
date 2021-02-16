@@ -66,6 +66,7 @@ require (
 	github.com/werf/kubedog v0.4.1-0.20210204234118-a6e65f252855
 	github.com/werf/lockgate v0.0.0-20200729113342-ec2c142f71ea
 	github.com/werf/logboek v0.5.2
+	github.com/werf/werf/pkg/deploy/helm/v3 v3.0.0-00010101000000-000000000000
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
@@ -120,3 +121,5 @@ replace k8s.io/helm => github.com/werf/helm v0.0.0-20210202111118-81e74d46da0f
 replace github.com/deislabs/oras => github.com/werf/oras v0.8.2-0.20210128161614-26d583f169ea
 
 replace helm.sh/helm/v3 => github.com/werf/helm/v3 v3.0.0-20210215143816-982684107ace
+
+replace github.com/werf/werf/pkg/deploy/helm/v3 => ./pkg/deploy/helm

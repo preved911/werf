@@ -8,7 +8,7 @@ import (
 
 	"helm.sh/helm/v3/pkg/postrender"
 
-	"github.com/werf/werf/pkg/deploy/helm"
+	"github.com/werf/werf/pkg/deploy/helm/v3"
 
 	"helm.sh/helm/v3/pkg/cli"
 

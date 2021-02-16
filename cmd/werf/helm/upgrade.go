@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/werf/werf/pkg/deploy/helm/command_helpers"
+	"github.com/werf/werf/pkg/deploy/helm/v3/command_helpers"
 
-	"github.com/werf/werf/pkg/deploy/helm/chart_extender"
+	"github.com/werf/werf/pkg/deploy/helm/v3/chart_extender"
 	"github.com/werf/werf/pkg/deploy/lock_manager"
 
 	"github.com/spf13/cobra"

@@ -9,7 +9,7 @@ import (
 
 	"github.com/werf/werf/pkg/util"
 
-	"github.com/werf/werf/pkg/deploy/helm/command_helpers"
+	"github.com/werf/werf/pkg/deploy/helm/v3/command_helpers"
 
 	uuid "github.com/satori/go.uuid"
 	"github.com/werf/lockgate"
