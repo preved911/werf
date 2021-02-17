@@ -65,6 +65,7 @@ require (
 	github.com/werf/kubedog v0.4.1-0.20201125180623-08ad3ea6f58c
 	github.com/werf/lockgate v0.0.0-20200729113342-ec2c142f71ea
 	github.com/werf/logboek v0.4.6
+	github.com/werf/werf/pkg/deploy/helm/v3 v3.0.0-20210217074223-6d7f2e22100f // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
