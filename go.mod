@@ -55,7 +55,7 @@ require (
 	github.com/rodaine/table v1.0.0
 	github.com/rubenv/sql-migrate v0.0.0-20200616145509-8d140a17f351 // indirect
 	github.com/satori/go.uuid v1.2.0
-	github.com/sirupsen/logrus v1.6.0
+	github.com/sirupsen/logrus v1.7.0
 	github.com/spaolacci/murmur3 v1.1.0
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/pflag v1.0.5
@@ -65,9 +65,10 @@ require (
 	github.com/werf/kubedog v0.4.1-0.20201125180623-08ad3ea6f58c
 	github.com/werf/lockgate v0.0.0-20200729113342-ec2c142f71ea
 	github.com/werf/logboek v0.4.6
+	github.com/werf/werf/pkg/deploy/helm/v3 v3.0.0-00010101000000-000000000000
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
-	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
 	google.golang.org/grpc v1.29.1
 	gopkg.in/dancannon/gorethink.v3 v3.0.5 // indirect
@@ -78,13 +79,13 @@ require (
 	gopkg.in/square/go-jose.v2 v2.3.1 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 	helm.sh/helm/v3 v3.5.1
-	k8s.io/api v0.19.2
+	k8s.io/api v0.20.1
 	k8s.io/apimachinery v0.20.2
-	k8s.io/cli-runtime v0.19.2
-	k8s.io/client-go v0.19.2
+	k8s.io/cli-runtime v0.20.1
+	k8s.io/client-go v0.20.1
 	k8s.io/helm v2.17.0+incompatible
 	k8s.io/klog v1.0.0
-	k8s.io/kubectl v0.18.6
+	k8s.io/kubectl v0.20.1
 	k8s.io/kubernetes v1.18.6 // indirect
 	mvdan.cc/xurls v1.1.0
 	rsc.io/letsencrypt v0.0.3 // indirect
@@ -148,6 +149,8 @@ replace github.com/jaguilar/vt100 => github.com/tonistiigi/vt100 v0.0.0-20190402
 
 replace github.com/google/go-containerregistry => github.com/alexey-igrychev/go-containerregistry v0.1.3-0.20200901133051-a73cc6cd741c
 
-replace helm.sh/helm/v3 => github.com/werf/helm/v3 v3.0.0-20200923113424-67dcadf45d7b
+replace helm.sh/helm/v3 => github.com/werf/helm/v3 v3.0.0-20210215143816-982684107ace
 
 replace k8s.io/helm => github.com/werf/helm v0.0.0-20210202092607-295e772eabb1
+
+replace github.com/werf/werf/pkg/deploy/helm/v3 => github.com/werf/werf/pkg/deploy/helm/v3 v3.0.0-20210217074223-6d7f2e22100f
