@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/werf/kubedog/pkg/kube"
 	"github.com/werf/logboek"
 
 	"github.com/werf/werf/cmd/werf/common"
@@ -227,18 +226,9 @@ func runConverge() error {
 		return err
 	}
 
-	kubeConfigOptions := kube.KubeConfigOptions{
-		Context:          *commonCmdData.KubeContext,
-		ConfigPath:       *commonCmdData.KubeConfig,
-		ConfigDataBase64: *commonCmdData.KubeConfigBase64,
-	}
-
-	if err := kube.Init(kube.InitOptions{KubeConfigOptions: kubeConfigOptions}); err != nil {
-		return fmt.Errorf("cannot initialize kube: %s", err)
-	}
-
-	if err := common.InitKubedog(ctx); err != nil {
-		return fmt.Errorf("cannot init kubedog: %s", err)
+	common.SetupOndemandKubeInitializer(*commonCmdData.KubeContext, *commonCmdData.KubeConfig, *commonCmdData.KubeConfigBase64)
+	if err := common.GetOndemandKubeInitializer().Init(ctx); err != nil {
+		return err
 	}
 
 	buildAndPublishOptions := build.BuildAndPublishOptions{
@@ -308,11 +298,11 @@ func runConverge() error {
 		logboek.LogOptionalLn()
 	}
 
-	actionConfig, err := common.NewActionConfig(ctx, namespace, &commonCmdData)
+	actionConfig, err := common.NewActionConfig(ctx, common.GetOndemandKubeInitializer(), namespace, &commonCmdData)
 	if err != nil {
 		return err
 	}
-	maintenanceHelper, err := common.CreateMaintenanceHelper(ctx, &commonCmdData, actionConfig, kubeConfigOptions)
+	maintenanceHelper, err := common.CreateMaintenanceHelper(ctx, &commonCmdData, actionConfig)
 	if err != nil {
 		return err
 	}
