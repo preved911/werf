@@ -6,6 +6,8 @@ sidebar: none
 relation: site
 ---
 
+HELLO
+
 <div class="intro-scheme" id="intro-scheme">
     <div class="page__container intro-scheme__container">
         {% include intro.md %}
