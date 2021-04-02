@@ -19,7 +19,8 @@ type Interface interface {
 
 	PrepareImage(ctx context.Context, c Conveyor, prevBuiltImage, image container_runtime.ImageInterface) error
 
-	PreRunHook(context.Context, Conveyor) error
+	PreRunHook(context.Context, Conveyor, container_runtime.ImageInterface) error
+	AfterRunHook(context.Context, Conveyor) error
 
 	SetDigest(digest string)
 	GetDigest() string

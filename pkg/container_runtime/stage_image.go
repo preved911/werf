@@ -104,7 +104,7 @@ func (i *StageImage) Build(ctx context.Context, options BuildOptions) error {
 				}
 
 				if err := i.container.rm(ctx); err != nil {
-					return fmt.Errorf("introspect error failed: %s", err)
+					return fmt.Errorf("rm container failed: %s", err)
 				}
 			}
 

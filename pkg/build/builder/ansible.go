@@ -22,6 +22,7 @@ import (
 )
 
 type Ansible struct {
+	cache *config.Cache
 	config *config.Ansible
 	extra  *Extra
 }
@@ -31,10 +32,14 @@ type Extra struct {
 	TmpPath           string
 }
 
-func NewAnsibleBuilder(config *config.Ansible, extra *Extra) *Ansible {
-	return &Ansible{config: config, extra: extra}
+func NewAnsibleBuilder(config *config.Ansible, cache *config.Cache, extra *Extra) *Ansible {
+	return &Ansible{config: config, cache: cache, extra: extra}
 }
 
+
+func (b *Ansible) Cache() *config.Cache {
+	return b.cache
+}
 func (b *Ansible) IsBeforeInstallEmpty(ctx context.Context) bool {
 	return b.isEmptyStage(ctx, "BeforeInstall")
 }

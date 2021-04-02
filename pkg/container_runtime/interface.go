@@ -65,6 +65,7 @@ type BuilderContainer interface {
 }
 
 type ContainerOptions interface {
+	AddMount(mounts ...string)
 	AddVolume(volumes ...string)
 	AddVolumeFrom(volumesFrom ...string)
 	AddExpose(exposes ...string)

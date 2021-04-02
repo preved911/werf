@@ -248,7 +248,11 @@ func (s *BaseStage) PrepareImage(ctx context.Context, c Conveyor, prevBuiltImage
 	return nil
 }
 
-func (s *BaseStage) PreRunHook(_ context.Context, _ Conveyor) error {
+func (s *BaseStage) PreRunHook(_ context.Context, _ Conveyor, _ container_runtime.ImageInterface) error {
+	return nil
+}
+
+func (s *BaseStage) AfterRunHook(_ context.Context, _ Conveyor) error {
 	return nil
 }
 

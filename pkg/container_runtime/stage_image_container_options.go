@@ -10,6 +10,7 @@ import (
 )
 
 type StageImageContainerOptions struct {
+	Mount      []string
 	Volume      []string
 	VolumesFrom []string
 	Expose      []string
@@ -27,6 +28,10 @@ func newStageContainerOptions() *StageImageContainerOptions {
 	c.Env = make(map[string]string)
 	c.Label = make(map[string]string)
 	return c
+}
+
+func (co *StageImageContainerOptions) AddMount(mounts ...string) {
+	co.Mount = append(co.Mount, mounts...)
 }
 
 func (co *StageImageContainerOptions) AddVolume(volumes ...string) {
@@ -75,6 +80,7 @@ func (co *StageImageContainerOptions) AddEntrypoint(entrypoint string) {
 
 func (co *StageImageContainerOptions) merge(co2 *StageImageContainerOptions) *StageImageContainerOptions {
 	mergedCo := newStageContainerOptions()
+	mergedCo.Mount = append(co.Mount, co2.Mount...)
 	mergedCo.Volume = append(co.Volume, co2.Volume...)
 	mergedCo.VolumesFrom = append(co.VolumesFrom, co2.VolumesFrom...)
 	mergedCo.Expose = append(co.Expose, co2.Expose...)
@@ -128,6 +134,10 @@ func (co *StageImageContainerOptions) merge(co2 *StageImageContainerOptions) *St
 
 func (co *StageImageContainerOptions) toRunArgs() ([]string, error) {
 	var args []string
+
+	for _, mount := range co.Mount {
+		args = append(args, fmt.Sprintf("--mount=%s", mount))
+	}
 
 	for _, volume := range co.Volume {
 		args = append(args, fmt.Sprintf("--volume=%s", volume))

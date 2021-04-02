@@ -15,6 +15,7 @@ type rawStapelImage struct {
 	FromImage        string       `yaml:"fromImage,omitempty"`
 	FromArtifact     string       `yaml:"fromArtifact,omitempty"`
 	RawGit           []*rawGit    `yaml:"git,omitempty"`
+	RawCache         *rawCache    `yaml:"cache,omitempty"`
 	RawShell         *rawShell    `yaml:"shell,omitempty"`
 	RawAnsible       *rawAnsible  `yaml:"ansible,omitempty"`
 	RawMount         []*rawMount  `yaml:"mount,omitempty"`
@@ -156,40 +157,6 @@ func (c *rawStapelImage) validateStapelImageDirective(image *StapelImage) (err e
 	return nil
 }
 
-func (c *rawStapelImage) toShellDirectiveByCommandAndStage(command string, stage string) (shell *Shell) {
-	shell = &Shell{}
-	switch stage {
-	case "beforeInstall":
-		shell.BeforeInstall = []string{command}
-	case "install":
-		shell.Install = []string{command}
-	case "beforeSetup":
-		shell.BeforeSetup = []string{command}
-	case "setup":
-		shell.Setup = []string{command}
-	}
-
-	shell.raw = c.RawShell
-
-	return
-}
-
-func (c *rawStapelImage) toAnsibleWithTaskByStage(task *AnsibleTask, stage string) (ansible *Ansible) {
-	ansible = &Ansible{}
-	switch stage {
-	case "beforeInstall":
-		ansible.BeforeInstall = []*AnsibleTask{task}
-	case "install":
-		ansible.Install = []*AnsibleTask{task}
-	case "beforeSetup":
-		ansible.BeforeSetup = []*AnsibleTask{task}
-	case "setup":
-		ansible.Setup = []*AnsibleTask{task}
-	}
-	ansible.raw = c.RawAnsible
-	return
-}
-
 func (c *rawStapelImage) validateStapelImageArtifactDirective(imageArtifact *StapelImageArtifact) (err error) {
 	if c.RawDocker != nil {
 		return newDetailedConfigError("`docker` section is not supported for artifact!", nil, c.doc)
@@ -226,6 +193,14 @@ func (c *rawStapelImage) toStapelImageBaseDirective(giterminismManager gitermini
 			} else {
 				imageBase.Git.Remote = append(imageBase.Git.Remote, gitRemote)
 			}
+		}
+	}
+
+	if c.RawCache != nil {
+		if cache, err := c.RawCache.toDirective(); err != nil {
+			return nil, err
+		} else {
+			imageBase.Cache = cache
 		}
 	}
 

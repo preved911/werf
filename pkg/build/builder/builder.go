@@ -2,6 +2,7 @@ package builder
 
 import (
 	"context"
+	"github.com/werf/werf/pkg/config"
 	"os"
 )
 
@@ -18,6 +19,16 @@ type Builder interface {
 	InstallChecksum(ctx context.Context) string
 	BeforeSetupChecksum(ctx context.Context) string
 	SetupChecksum(ctx context.Context) string
+	Cache() *config.Cache
+
+	//IsBeforeInstallCacheExist() bool
+	//IsInstallCacheExist() bool
+	//IsBeforeSetupCacheExist() bool
+	//IsSetupCacheExist() bool
+	//IsBeforeInstallCacheChecksum() string
+	//IsInstallCacheChecksum() string
+	//IsBeforeSetupCacheChecksum() string
+	//IsSetupCacheChecksum() string
 }
 
 type Container interface {

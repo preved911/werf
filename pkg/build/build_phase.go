@@ -594,11 +594,15 @@ func (phase *BuildPhase) buildStage(ctx context.Context, img *Image, stg stage.I
 			options.Style(style.Highlight())
 		}).
 		DoError(func() (err error) {
-			if err := stg.PreRunHook(ctx, phase.Conveyor); err != nil {
+			if err := stg.PreRunHook(ctx, phase.Conveyor, stg.GetImage()); err != nil {
 				return fmt.Errorf("%s preRunHook failed: %s", stg.LogDetailedName(), err)
 			}
 
-			return phase.atomicBuildStageImage(ctx, img, stg)
+			if err := phase.atomicBuildStageImage(ctx, img, stg); err != nil {
+				return err
+			}
+
+			return stg.AfterRunHook(ctx, phase.Conveyor)
 		}); err != nil {
 		return err
 	}

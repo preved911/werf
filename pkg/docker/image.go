@@ -65,6 +65,12 @@ func ImageInspect(ctx context.Context, ref string) (*types.ImageInspect, error) 
 	return &inspect, nil
 }
 
+func ImageRemove(ctx context.Context, ref string) ([]types.ImageDeleteResponseItem, error) {
+	return apiCli(ctx).ImageRemove(ctx, ref, types.ImageRemoveOptions{
+		Force:         true,
+	})
+}
+
 func doCliPull(c command.Cli, args ...string) error {
 	return prepareCliCmd(image.NewPullCommand(c), args...).Execute()
 }

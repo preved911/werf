@@ -6,6 +6,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"golang.org/x/net/context"
+	"io"
 )
 
 func Containers(ctx context.Context, options types.ContainerListOptions) ([]types.Container, error) {
@@ -28,6 +29,10 @@ func ContainerAttach(ctx context.Context, ref string, options types.ContainerAtt
 
 func ContainerInspect(ctx context.Context, ref string) (types.ContainerJSON, error) {
 	return apiCli(ctx).ContainerInspect(ctx, ref)
+}
+
+func ContainerLogs(ctx context.Context, ref string) (io.ReadCloser, error) {
+	return apiCli(ctx).ContainerLogs(ctx, ref, types.ContainerLogsOptions{ShowStdout: true})
 }
 
 func ContainerCommit(ctx context.Context, ref string, commitOptions types.ContainerCommitOptions) (string, error) {

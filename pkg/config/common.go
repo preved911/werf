@@ -58,6 +58,15 @@ func isRelativePath(path string) bool {
 	}()
 }
 
+func allAbsolutePaths(paths []string) bool {
+	for _, p := range paths {
+		if !isAbsolutePath(p) {
+			return false
+		}
+	}
+	return true
+}
+
 func isAbsolutePath(p string) bool {
 	return path.IsAbs(p)
 }

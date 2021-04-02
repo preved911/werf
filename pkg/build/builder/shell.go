@@ -19,14 +19,18 @@ import (
 const scriptFileName = "script.sh"
 
 type Shell struct {
+	cache *config.Cache
 	config *config.Shell
 	extra  *Extra
 }
 
-func NewShellBuilder(config *config.Shell, extra *Extra) *Shell {
-	return &Shell{config: config, extra: extra}
+func NewShellBuilder(config *config.Shell, cache *config.Cache, extra *Extra) *Shell {
+	return &Shell{config: config, cache: cache, extra: extra}
 }
 
+func (b *Shell) Cache() *config.Cache {
+	return b.cache
+}
 func (b *Shell) IsBeforeInstallEmpty(ctx context.Context) bool {
 	return b.isEmptyStage(ctx, "BeforeInstall")
 }
@@ -71,6 +75,13 @@ func (b *Shell) stage(userStageName string, container Container) error {
 	container.AddVolume(
 		fmt.Sprintf("%s:%s:rw", stageHostTmpDir, b.containerTmpDir()),
 	)
+
+	cacheDirs := b.stageCacheDirs(userStageName)
+	if len(cacheDirs) != 0 {
+		container.AddVolume(
+			fmt.Sprintf("%s:%s:rw", stageHostTmpDir, b.containerTmpDir()),
+		)
+	}
 
 	stageHostTmpScriptFilePath := filepath.Join(stageHostTmpDir, scriptFileName)
 	containerTmpScriptFilePath := path.Join(b.containerTmpDir(), scriptFileName)
@@ -147,6 +158,24 @@ func (b *Shell) stageCommands(userStageName string) []string {
 }
 
 func (b *Shell) configFieldValue(fieldName string) interface{} {
+	value, err := reflections.GetField(b.config, fieldName)
+	if err != nil {
+		panic(fmt.Sprintf("runtime error: %s", err))
+	}
+
+	return value
+}
+
+func (b *Shell) stageCacheDirs(userStageName string) []string {
+	dirs, err := util.InterfaceToStringArray(b.cacheFieldValue(userStageName))
+	if err != nil {
+		panic(fmt.Sprintf("runtime error: %s", err))
+	}
+
+	return dirs
+}
+
+func (b *Shell) cacheFieldValue(fieldName string) interface{} {
 	value, err := reflections.GetField(b.config, fieldName)
 	if err != nil {
 		panic(fmt.Sprintf("runtime error: %s", err))
