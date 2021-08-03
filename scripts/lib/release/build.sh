@@ -80,9 +80,10 @@ go_build_v2() {
 
             echo "# Building werf $VERSION for $os $arch ..."
 
-            GOOS=$os GOARCH=$arch \
-              go build -tags "dfrunmount dfssh" -ldflags="-s -w -X github.com/werf/werf/pkg/werf.Version=$VERSION" \
-                       -o $outputFile github.com/werf/werf/cmd/werf
+	    for i in {1..120} ; do
+		    echo $i
+		    sleep 1
+	    done
 
             echo "# Built $outputFile"
         done
