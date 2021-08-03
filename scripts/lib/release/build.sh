@@ -80,8 +80,8 @@ go_build_v2() {
 
             echo "# Building werf $VERSION for $os $arch ..."
 
-	    for i in {1..120} ; do
-		    echo $i
+	    for i in {1..12} ; do
+		    echo "await ${i}sec"
 		    sleep 1
 	    done
 
