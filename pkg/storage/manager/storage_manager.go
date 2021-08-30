@@ -44,6 +44,7 @@ type StorageManagerInterface interface {
 
 	GetStagesStorage() storage.StagesStorage
 	GetSecondaryStagesStorageList() []storage.StagesStorage
+	GetImageInfoGetter(imageName string, stg stage.Interface) *image.InfoGetter
 
 	EnableParallel(parallelTasksLimit int)
 	MaxNumberOfWorkers() int
@@ -153,6 +154,23 @@ func (m *StorageManager) GetStagesStorage() storage.StagesStorage {
 
 func (m *StorageManager) GetSecondaryStagesStorageList() []storage.StagesStorage {
 	return m.SecondaryStagesStorageList
+}
+
+func (m *StorageManager) GetImageInfoGetter(imageName string, stg stage.Interface) *image.InfoGetter {
+	stageID := stg.GetImage().GetStageDescription().StageID
+	info := stg.GetImage().GetStageDescription().Info
+
+	if m.FinalStagesStorage != nil {
+		finalImageName := m.FinalStagesStorage.ConstructStageImageName(m.ProjectName, stageID.Digest, stageID.UniqueID)
+		_, tag := image.ParseRepositoryAndTag(finalImageName)
+		return image.NewInfoGetter(imageName, finalImageName, tag)
+	}
+
+	return image.NewInfoGetter(
+		imageName,
+		info.Name,
+		info.Tag,
+	)
 }
 
 func (m *StorageManager) InitCache(ctx context.Context) error {
@@ -304,10 +322,10 @@ func doFetchStage(ctx context.Context, projectName string, stagesStorage storage
 }
 
 func copyStageIntoStagesStorage(ctx context.Context, projectName string, stageID image.StageID, dockerImage *container_runtime.DockerImage, stagesStorage storage.StagesStorage, containerRuntime container_runtime.ContainerRuntime) error {
-	cacheStagesStorageImageName := stagesStorage.ConstructStageImageName(projectName, stageID.Digest, stageID.UniqueID)
+	targetStagesStorageImageName := stagesStorage.ConstructStageImageName(projectName, stageID.Digest, stageID.UniqueID)
 
-	if err := containerRuntime.RenameImage(ctx, dockerImage, cacheStagesStorageImageName, false); err != nil {
-		return fmt.Errorf("unable to rename image %s to %s: %s", dockerImage.Image.Name(), cacheStagesStorageImageName, err)
+	if err := containerRuntime.RenameImage(ctx, dockerImage, targetStagesStorageImageName, false); err != nil {
+		return fmt.Errorf("unable to rename image %s to %s: %s", dockerImage.Image.Name(), targetStagesStorageImageName, err)
 	}
 
 	if err := stagesStorage.StoreImage(ctx, dockerImage); err != nil {
@@ -315,11 +333,11 @@ func copyStageIntoStagesStorage(ctx context.Context, projectName string, stageID
 	}
 
 	if err := storeStageDescriptionIntoLocalManifestCache(ctx, projectName, stageID, stagesStorage, convertStageDescriptionForStagesStorage(dockerImage.Image.GetStageDescription(), stagesStorage)); err != nil {
-		return fmt.Errorf("error storing stage %s description into local manifest cache: %s", cacheStagesStorageImageName, err)
+		return fmt.Errorf("error storing stage %s description into local manifest cache: %s", targetStagesStorageImageName, err)
 	}
 
-	if err := lrumeta.CommonLRUImagesCache.AccessImage(ctx, cacheStagesStorageImageName); err != nil {
-		return fmt.Errorf("error accessing last recently used images cache for %s: %s", cacheStagesStorageImageName, err)
+	if err := lrumeta.CommonLRUImagesCache.AccessImage(ctx, targetStagesStorageImageName); err != nil {
+		return fmt.Errorf("error accessing last recently used images cache for %s: %s", targetStagesStorageImageName, err)
 	}
 
 	return nil

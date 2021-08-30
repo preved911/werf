@@ -330,10 +330,12 @@ func (c *Conveyor) GetImageInfoGetters() (images []*imagePkg.InfoGetter) {
 		if img.isArtifact {
 			continue
 		}
-		images = append(images, img.GetImageInfoGetter())
+
+		getter := c.StorageManager.GetImageInfoGetter(img.name, img.GetLastNonEmptyStage())
+		images = append(images, getter)
 	}
 
-	return images
+	return
 }
 
 func (c *Conveyor) GetExportedImagesNames() []string {
