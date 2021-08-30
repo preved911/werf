@@ -40,6 +40,8 @@ type ForEachDeleteStageOptions struct {
 }
 
 type StorageManagerInterface interface {
+	InitCache(ctx context.Context) error
+
 	GetStagesStorage() storage.StagesStorage
 	GetSecondaryStagesStorageList() []storage.StagesStorage
 
@@ -81,9 +83,47 @@ func NewStorageManager(projectName string, stagesStorage storage.StagesStorage, 
 		StagesStorageCache: stagesStorageCache,
 
 		StagesStorage:              stagesStorage,
+		FinalStagesStorage:         finalStagesStorage,
 		CacheStagesStorageList:     cacheStagesStorageList,
 		SecondaryStagesStorageList: secondaryStagesStorageList,
 	}
+}
+
+type StagesList struct {
+	Mux      sync.Mutex
+	StageIDs []image.StageID
+}
+
+func NewStagesList(stageIDs []image.StageID) *StagesList {
+	return &StagesList{
+		StageIDs: stageIDs,
+	}
+}
+
+func (stages *StagesList) GetStageIDs() []image.StageID {
+	stages.Mux.Lock()
+	defer stages.Mux.Unlock()
+
+	var res []image.StageID
+
+	for _, stg := range stages.StageIDs {
+		res = append(res, stg)
+	}
+
+	return res
+}
+
+func (stages *StagesList) AddStageID(stageID image.StageID) {
+	stages.Mux.Lock()
+	defer stages.Mux.Unlock()
+
+	for _, stg := range stages.StageIDs {
+		if stg.IsEqual(stageID) {
+			return
+		}
+	}
+
+	stages.StageIDs = append(stages.StageIDs, stageID)
 }
 
 type StorageManager struct {
@@ -102,6 +142,9 @@ type StorageManager struct {
 
 	// These will be released automatically when current process exits
 	SharedHostImagesLocks []lockgate.LockHandle
+
+	FinalStagesListCacheMux sync.Mutex
+	FinalStagesListCache    *StagesList
 }
 
 func (m *StorageManager) GetStagesStorage() storage.StagesStorage {
@@ -110,6 +153,18 @@ func (m *StorageManager) GetStagesStorage() storage.StagesStorage {
 
 func (m *StorageManager) GetSecondaryStagesStorageList() []storage.StagesStorage {
 	return m.SecondaryStagesStorageList
+}
+
+func (m *StorageManager) InitCache(ctx context.Context) error {
+	logboek.Context(ctx).Info().LogF("Initializing storage manager cache\n")
+
+	if m.FinalStagesStorage != nil {
+		if _, err := m.getOrCreateFinalStagesListCache(ctx); err != nil {
+			return fmt.Errorf("unable to get or create final stages list cache: %s", err)
+		}
+	}
+
+	return nil
 }
 
 func (m *StorageManager) EnableParallel(parallelTasksLimit int) {
@@ -460,21 +515,66 @@ func (m *StorageManager) CopyStageIntoCache(ctx context.Context, stg stage.Inter
 	return nil
 }
 
+func (m *StorageManager) getOrCreateFinalStagesListCache(ctx context.Context) (*StagesList, error) {
+	m.FinalStagesListCacheMux.Lock()
+	defer m.FinalStagesListCacheMux.Unlock()
+
+	if m.FinalStagesListCache != nil {
+		return m.FinalStagesListCache, nil
+	}
+
+	stageIDs, err := m.FinalStagesStorage.GetStagesIDs(ctx, m.ProjectName)
+	if err != nil {
+		return nil, fmt.Errorf("unable to get final repo stages list: %s", err)
+	}
+	m.FinalStagesListCache = NewStagesList(stageIDs)
+
+	return m.FinalStagesListCache, nil
+}
+
 func (m *StorageManager) CopyStageIntoFinalRepo(ctx context.Context, stg stage.Interface, containerRuntime container_runtime.ContainerRuntime) error {
 	if m.FinalStagesStorage == nil {
 		return nil
 	}
 
+	existingStagesListCache, err := m.getOrCreateFinalStagesListCache(ctx)
+	if err != nil {
+		return fmt.Errorf("error getting existing stages list of final repo %s: %s", m.FinalStagesStorage.String(), err)
+	}
+
+	logboek.Context(ctx).Debug().LogF("[%p] Got existing final stages list cache: %#v\n", m, existingStagesListCache.StageIDs)
+
 	stageID := stg.GetImage().GetStageDescription().StageID
+
+	for _, existingStg := range existingStagesListCache.GetStageIDs() {
+		if existingStg.IsEqual(*stageID) {
+			logboek.Context(ctx).Info().LogF("Stage %s already exists in the final repo, skipping\n", stageID.String())
+			return nil
+		}
+	}
+
+	if err := m.FetchStage(ctx, containerRuntime, stg); err != nil {
+		return fmt.Errorf("unable to fetch stage %s: %s", stg.LogDetailedName(), err)
+	}
+
 	dockerImage := &container_runtime.DockerImage{Image: stg.GetImage()}
 
-	return logboek.Context(ctx).Default().LogProcess("Copy stage %q into the final repo %s", stg.LogDetailedName(), m.FinalStagesStorage.String).
+	err = logboek.Context(ctx).Default().LogProcess("Copy stage %q into the final repo %s", stg.LogDetailedName(), m.FinalStagesStorage.String()).
 		DoError(func() error {
 			if err := copyStageIntoStagesStorage(ctx, m.ProjectName, *stageID, dockerImage, m.FinalStagesStorage, containerRuntime); err != nil {
 				return fmt.Errorf("unable to copy stage %s into the final repo %s: %s", stageID.String(), m.FinalStagesStorage.String(), err)
 			}
 			return nil
 		})
+	if err != nil {
+		return err
+	}
+
+	existingStagesListCache.AddStageID(*stageID)
+
+	logboek.Context(ctx).Debug().LogF("Updated existing final stages list: %#v\n", m.FinalStagesListCache.StageIDs)
+
+	return nil
 }
 
 func (m *StorageManager) SelectSuitableStage(ctx context.Context, c stage.Conveyor, stg stage.Interface, stages []*image.StageDescription) (*image.StageDescription, error) {

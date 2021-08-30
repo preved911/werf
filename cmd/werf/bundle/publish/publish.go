@@ -253,6 +253,10 @@ func runPublish(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+		finalStagesStorage, err := common.GetOptionalFinalStagesStorage(containerRuntime, &commonCmdData)
+		if err != nil {
+			return err
+		}
 		synchronization, err := common.GetSynchronization(ctx, &commonCmdData, projectName, stagesStorage)
 		if err != nil {
 			return err
@@ -274,7 +278,7 @@ func runPublish(ctx context.Context) error {
 			return err
 		}
 
-		storageManager := manager.NewStorageManager(projectName, stagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
+		storageManager := manager.NewStorageManager(projectName, stagesStorage, finalStagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
 
 		imagesRepository = storageManager.StagesStorage.String()
 

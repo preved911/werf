@@ -174,6 +174,7 @@ func run() error {
 		return err
 	}
 
+	_ = finalStagesStorage
 	_ = stagesStorageCache
 	_ = storageLockManager
 	_ = secondaryStagesStorageList

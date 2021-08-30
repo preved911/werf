@@ -229,7 +229,7 @@ It is worth noting that auto-cleaning is enabled by default, and manual use is u
 		return err
 	}
 
-	storageManager := manager.NewStorageManager(projectName, stagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
+	storageManager := manager.NewStorageManager(projectName, stagesStorage, finalStagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
 
 	if *commonCmdData.Parallel {
 		storageManager.EnableParallel(int(*commonCmdData.ParallelTasksLimit))

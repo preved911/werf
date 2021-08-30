@@ -381,6 +381,7 @@ func SetupCommonRepoData(cmdData *CmdData, cmd *cobra.Command) {
 func SetupCommonFinalRepoData(cmdData *CmdData, cmd *cobra.Command) {
 	cmdData.CommonFinalRepoData = &RepoData{IsCommon: true}
 
+	cmdData.CommonFinalRepoData.Implementation = new(string) // legacy
 	SetupContainerRegistryForRepoData(cmdData.CommonFinalRepoData, cmd, "final-repo-container-registry", []string{"WERF_REPO_CONTAINER_REGISTRY"})
 	SetupDockerHubUsernameForRepoData(cmdData.CommonFinalRepoData, cmd, "final-repo-docker-hub-username", []string{"WERF_REPO_DOCKER_HUB_USERNAME"})
 	SetupDockerHubPasswordForRepoData(cmdData.CommonFinalRepoData, cmd, "final-repo-docker-hub-password", []string{"WERF_REPO_DOCKER_HUB_PASSWORD"})
@@ -956,6 +957,35 @@ func GetStagesStorage(stagesStorageAddress string, containerRuntime container_ru
 }
 
 func GetOptionalFinalStagesStorage(containerRuntime container_runtime.ContainerRuntime, cmdData *CmdData) (storage.StagesStorage, error) {
+	finalRepoAddress := *cmdData.FinalStagesStorage
+	if finalRepoAddress == "" {
+		return nil, nil
+	}
+
+	if err := ValidateRepoContainerRegistry(cmdData.CommonFinalRepoData.GetContainerRegistry()); err != nil {
+		return nil, err
+	}
+
+	return storage.NewStagesStorage(
+		finalRepoAddress,
+		containerRuntime,
+		storage.StagesStorageOptions{
+			RepoStagesStorageOptions: storage.RepoStagesStorageOptions{
+				ContainerRegistry: cmdData.CommonFinalRepoData.GetContainerRegistry(),
+				DockerRegistryOptions: docker_registry.DockerRegistryOptions{
+					InsecureRegistry:      *cmdData.InsecureRegistry,
+					SkipTlsVerifyRegistry: *cmdData.SkipTlsVerifyRegistry,
+					DockerHubUsername:     *cmdData.CommonFinalRepoData.DockerHubUsername,
+					DockerHubPassword:     *cmdData.CommonFinalRepoData.DockerHubPassword,
+					DockerHubToken:        *cmdData.CommonFinalRepoData.DockerHubToken,
+					GitHubToken:           *cmdData.CommonFinalRepoData.GitHubToken,
+					HarborUsername:        *cmdData.CommonFinalRepoData.HarborUsername,
+					HarborPassword:        *cmdData.CommonFinalRepoData.HarborPassword,
+					QuayToken:             *cmdData.CommonFinalRepoData.QuayToken,
+				},
+			},
+		},
+	)
 }
 
 func GetCacheStagesStorageList(containerRuntime container_runtime.ContainerRuntime, cmdData *CmdData) ([]storage.StagesStorage, error) {

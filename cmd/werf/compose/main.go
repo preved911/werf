@@ -430,7 +430,7 @@ func run(ctx context.Context, giterminismManager giterminism_manager.Interface, 
 		return err
 	}
 
-	storageManager := manager.NewStorageManager(projectName, stagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
+	storageManager := manager.NewStorageManager(projectName, stagesStorage, finalStagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
 
 	logboek.Context(ctx).Info().LogOptionalLn()
 

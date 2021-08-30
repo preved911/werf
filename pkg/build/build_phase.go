@@ -152,7 +152,10 @@ func (phase *BuildPhase) Name() string {
 	return "build"
 }
 
-func (phase *BuildPhase) BeforeImages(_ context.Context) error {
+func (phase *BuildPhase) BeforeImages(ctx context.Context) error {
+	if err := phase.Conveyor.StorageManager.InitCache(ctx); err != nil {
+		return fmt.Errorf("unable to init storage manager cache: %s", err)
+	}
 	return nil
 }
 

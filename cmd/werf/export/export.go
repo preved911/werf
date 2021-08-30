@@ -219,7 +219,7 @@ func run(imagesToProcess, tagTemplateList []string) error {
 		return err
 	}
 
-	storageManager := manager.NewStorageManager(projectName, stagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
+	storageManager := manager.NewStorageManager(projectName, stagesStorage, finalStagesStorage, secondaryStagesStorageList, cacheStagesStorageList, storageLockManager, stagesStorageCache)
 
 	logboek.Context(ctx).Info().LogOptionalLn()
 
