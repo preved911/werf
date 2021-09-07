@@ -181,7 +181,7 @@ func checkNewChangesInServiceWorktreeIndex(ctx context.Context, serviceWorktreeD
 		"-s",
 	}
 
-	output, err := runGitCmd(ctx, gitDiffArgs, serviceWorktreeDir, runGitCmdOptions{})
+	output, err := runGitCmd(ctx, gitDiffArgs, serviceWorktreeDir, runGitCmdOptions{x: true})
 	if err != nil {
 		return false, err
 	}
