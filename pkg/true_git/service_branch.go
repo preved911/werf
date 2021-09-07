@@ -167,7 +167,7 @@ func addChangesToServiceWorktreeIndex(ctx context.Context, sourceWorktreeDir str
 	}
 
 	gitAddArgs = append(gitAddArgs, pathSpecList...)
-	if _, err := runGitCmd(ctx, gitAddArgs, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
+	if _, err := runGitCmd(ctx, gitAddArgs, serviceWorktreeDir, runGitCmdOptions{x: true}); err != nil {
 		return err
 	}
 
@@ -210,6 +210,7 @@ func commitNewChangesInServiceBranch(ctx context.Context, serviceWorktreeDir str
 
 type runGitCmdOptions struct {
 	stdin io.Reader
+	x     bool
 }
 
 func runGitCmd(ctx context.Context, args []string, dir string, opts runGitCmdOptions) (*bytes.Buffer, error) {
@@ -221,7 +222,14 @@ func runGitCmd(ctx context.Context, args []string, dir string, opts runGitCmdOpt
 		cmd.Stdin = opts.stdin
 	}
 
-	output := SetCommandRecordingLiveOutput(ctx, cmd)
+	var output io.Reader
+	output = bytes.NewBuffer(nil)
+	if !opts.x {
+		output = SetCommandRecordingLiveOutput(ctx, cmd)
+	} else {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+	}
 
 	err := cmd.Run()
 
@@ -234,7 +242,7 @@ func runGitCmd(ctx context.Context, args []string, dir string, opts runGitCmdOpt
 		return nil, err
 	}
 
-	return output, err
+	return output.(*bytes.Buffer), err
 }
 
 func debug() bool {
