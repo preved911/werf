@@ -62,7 +62,7 @@ func syncWorktreeWithServiceWorktreeBranch(ctx context.Context, sourceWorktreeDi
 		return "", fmt.Errorf("unable to get or prepare service branch head commit: %s", err)
 	}
 
-	if _, err := runGitCmd(ctx, []string{"checkout", branchName}, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
+	if _, err := runGitCmd(ctx, []string{"checkout", "--progress", branchName}, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
 		return "", fmt.Errorf("unable to checkout service branch: %s", err)
 	}
 
@@ -100,7 +100,7 @@ func getOrPrepareServiceBranchHeadCommit(ctx context.Context, serviceWorktreeDir
 	isServiceBranchExist = output.Len() != 0
 
 	if !isServiceBranchExist {
-		if _, err := runGitCmd(ctx, []string{"checkout", "-b", branchName, sourceCommit}, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
+		if _, err := runGitCmd(ctx, []string{"checkout", "--progress", "-b", branchName, sourceCommit}, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
 			return "", err
 		}
 
@@ -160,6 +160,7 @@ func addChangesToServiceWorktreeIndex(ctx context.Context, sourceWorktreeDir str
 		"--work-tree",
 		sourceWorktreeDir,
 		"add",
+		"--verbose",
 		"--all",
 		"--",
 		".",
@@ -206,7 +207,7 @@ func commitNewChangesInServiceBranch(ctx context.Context, serviceWorktreeDir str
 	}
 	serviceNewCommit := strings.TrimSpace(output.String())
 
-	if _, err := runGitCmd(ctx, []string{"checkout", "--force", "--detach", serviceNewCommit}, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
+	if _, err := runGitCmd(ctx, []string{"checkout", "--progress", "--force", "--detach", serviceNewCommit}, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
 		return "", err
 	}
 
