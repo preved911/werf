@@ -4,17 +4,16 @@ import (
 	"bytes"
 	"context"
 	"io"
+	"os"
 	"os/exec"
-
-	"github.com/werf/logboek"
 )
 
 func SetCommandRecordingLiveOutput(ctx context.Context, cmd *exec.Cmd) *bytes.Buffer {
 	recorder := &bytes.Buffer{}
 
 	if liveGitOutput {
-		cmd.Stdout = io.MultiWriter(recorder, logboek.Context(ctx).OutStream())
-		cmd.Stderr = io.MultiWriter(recorder, logboek.Context(ctx).ErrStream())
+		cmd.Stdout = io.MultiWriter(recorder, os.Stdout)
+		cmd.Stderr = io.MultiWriter(recorder, os.Stderr)
 	} else {
 		cmd.Stdout = recorder
 		cmd.Stderr = recorder
