@@ -37,6 +37,11 @@ func SyncSourceWorktreeWithServiceBranch(ctx context.Context, gitDir, sourceWork
 			return fmt.Errorf("unable to prepare worktree for commit %v: %s", commit, err)
 		}
 
+		currentCommitPath := filepath.Join(worktreeCacheDir, "current_commit")
+		if err := os.RemoveAll(currentCommitPath); err != nil {
+			return fmt.Errorf("unable to remove %s: %s", currentCommitPath, err)
+		}
+
 		branchName := fmt.Sprintf("%s%s", opts.ServiceBranchPrefix, commit)
 		resultCommit, err = syncWorktreeWithServiceWorktreeBranch(ctx, sourceWorktreeDir, serviceWorktreeDir, commit, branchName, opts.GlobIncludeList, opts.GlobExcludeList)
 		if err != nil {
