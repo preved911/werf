@@ -10,10 +10,13 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/werf/logboek"
 )
 
 type SyncSourceWorktreeWithServiceBranchOptions struct {
 	ServiceBranchPrefix string
+	GlobIncludeList     []string
 	GlobExcludeList     []string
 }
 
@@ -34,13 +37,8 @@ func SyncSourceWorktreeWithServiceBranch(ctx context.Context, gitDir, sourceWork
 			return fmt.Errorf("unable to prepare worktree for commit %v: %s", commit, err)
 		}
 
-		currentCommitPath := filepath.Join(worktreeCacheDir, "current_commit")
-		if err := os.RemoveAll(currentCommitPath); err != nil {
-			return fmt.Errorf("unable to remove %s: %s", currentCommitPath, err)
-		}
-
 		branchName := fmt.Sprintf("%s%s", opts.ServiceBranchPrefix, commit)
-		resultCommit, err = syncWorktreeWithServiceWorktreeBranch(ctx, sourceWorktreeDir, serviceWorktreeDir, commit, branchName, opts.GlobExcludeList)
+		resultCommit, err = syncWorktreeWithServiceWorktreeBranch(ctx, sourceWorktreeDir, serviceWorktreeDir, commit, branchName, opts.GlobIncludeList, opts.GlobExcludeList)
 		if err != nil {
 			return fmt.Errorf("unable to sync worktree with service branch %q: %s", branchName, err)
 		}
@@ -53,7 +51,7 @@ func SyncSourceWorktreeWithServiceBranch(ctx context.Context, gitDir, sourceWork
 	return resultCommit, nil
 }
 
-func syncWorktreeWithServiceWorktreeBranch(ctx context.Context, sourceWorktreeDir, serviceWorktreeDir, sourceCommit, branchName string, globExcludeList []string) (string, error) {
+func syncWorktreeWithServiceWorktreeBranch(ctx context.Context, sourceWorktreeDir, serviceWorktreeDir, sourceCommit, branchName string, globIncludeList, globExcludeList []string) (string, error) {
 	serviceBranchHeadCommit, err := getOrPrepareServiceBranchHeadCommit(ctx, serviceWorktreeDir, sourceCommit, branchName)
 	if err != nil {
 		return "", fmt.Errorf("unable to get or prepare service branch head commit: %s", err)
@@ -67,7 +65,7 @@ func syncWorktreeWithServiceWorktreeBranch(ctx context.Context, sourceWorktreeDi
 		return "", fmt.Errorf("unable to revert excluded changes in service worktree index: %q", err)
 	}
 
-	if err := addChangesToServiceWorktreeIndex(ctx, sourceWorktreeDir, serviceWorktreeDir, globExcludeList); err != nil {
+	if err := addChangesToServiceWorktreeIndex(ctx, sourceWorktreeDir, serviceWorktreeDir, globIncludeList, globExcludeList); err != nil {
 		return "", fmt.Errorf("unable to add changes to service worktree index: %s", err)
 	}
 
@@ -144,10 +142,13 @@ func revertExcludedChangesInServiceWorktreeIndex(ctx context.Context, sourceWork
 	return nil
 }
 
-func addChangesToServiceWorktreeIndex(ctx context.Context, sourceWorktreeDir string, serviceWorktreeDir string, globExcludeList []string) error {
-	var pathSpecExcludeList []string
+func addChangesToServiceWorktreeIndex(ctx context.Context, sourceWorktreeDir string, serviceWorktreeDir string, globIncludeList, globExcludeList []string) error {
+	var pathSpecList []string
+	for _, glob := range globIncludeList {
+		pathSpecList = append(pathSpecList, ":"+glob)
+	}
 	for _, glob := range globExcludeList {
-		pathSpecExcludeList = append(pathSpecExcludeList, ":!"+glob)
+		pathSpecList = append(pathSpecList, ":!"+glob)
 	}
 
 	gitAddArgs := []string{
@@ -159,7 +160,7 @@ func addChangesToServiceWorktreeIndex(ctx context.Context, sourceWorktreeDir str
 		".",
 	}
 
-	gitAddArgs = append(gitAddArgs, pathSpecExcludeList...)
+	gitAddArgs = append(gitAddArgs, pathSpecList...)
 	if _, err := runGitCmd(ctx, gitAddArgs, serviceWorktreeDir, runGitCmdOptions{}); err != nil {
 		return err
 	}
@@ -226,7 +227,7 @@ func runGitCmd(ctx context.Context, args []string, dir string, opts runGitCmdOpt
 
 	cmdWithArgs := strings.Join(append([]string{cmd.Path, "-C " + dir}, cmd.Args[1:]...), " ")
 	if debug() {
-		fmt.Printf("[DEBUG] %s\n%s\n", cmdWithArgs, output)
+		logboek.Context(ctx).Debug().LogF("%s\n%s\n", cmdWithArgs, output)
 	}
 
 	if err != nil {

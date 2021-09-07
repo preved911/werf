@@ -14,10 +14,14 @@ import (
 	"github.com/werf/werf/pkg/true_git"
 )
 
+type Options struct {
+	UntrackedFilesMode string
+}
+
 // Status returns Result with path lists of untracked files and modified files for index and worktree.
 // The function counts each file status as Modified if it is not Unmodified or Untracked ([ADU] == M).
 // The function does not work with ignored, renamed and copied files.
-func Status(ctx context.Context, workTreeDir string) (r Result, err error) {
+func Status(ctx context.Context, workTreeDir string, opts Options) (r Result, err error) {
 	logboek.Context(ctx).Debug().
 		LogProcess("Status %s", workTreeDir).
 		Options(func(options types.LogProcessOptionsInterface) {
@@ -26,7 +30,7 @@ func Status(ctx context.Context, workTreeDir string) (r Result, err error) {
 			}
 		}).
 		Do(func() {
-			r, err = status(ctx, workTreeDir)
+			r, err = status(ctx, workTreeDir, opts)
 
 			if debug() {
 				logboek.Context(ctx).Debug().LogF("result: %+v\n", r)
@@ -37,10 +41,15 @@ func Status(ctx context.Context, workTreeDir string) (r Result, err error) {
 	return
 }
 
-func status(ctx context.Context, workTreeDir string) (Result, error) {
+func status(ctx context.Context, workTreeDir string, opts Options) (Result, error) {
 	result := Result{}
 
-	args := append([]string{}, "status", "--porcelain=v2", "--untracked-files=all", "--no-renames")
+	untrackedFilesMode := "all"
+	if opts.UntrackedFilesMode != "" {
+		untrackedFilesMode = opts.UntrackedFilesMode
+	}
+
+	args := append([]string{}, "status", "--porcelain=v2", fmt.Sprintf("--untracked-files=%s", untrackedFilesMode), "--no-renames")
 	cmd := exec.Command("git", args...)
 	cmd.Dir = workTreeDir
 

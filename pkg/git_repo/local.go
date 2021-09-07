@@ -71,22 +71,31 @@ func OpenLocalRepo(ctx context.Context, name, workTreeDir string, opts OpenLocal
 			defer werf.ReleaseHostLock(lock)
 		}
 
-		devHeadCommit, err := true_git.SyncSourceWorktreeWithServiceBranch(
-			context.Background(),
-			l.GitDir,
-			l.WorkTreeDir,
-			l.getRepoWorkTreeCacheDir(l.getRepoID()),
-			l.headCommit,
-			true_git.SyncSourceWorktreeWithServiceBranchOptions{
-				ServiceBranchPrefix: opts.ServiceBranchOptions.Prefix,
-				GlobExcludeList:     opts.ServiceBranchOptions.GlobExcludeList,
-			},
-		)
+		result, err := status.Status(ctx, l.WorkTreeDir, status.Options{UntrackedFilesMode: "normal"})
 		if err != nil {
-			return l, err
+			return nil, err
 		}
 
-		l.headCommit = devHeadCommit
+		changedFiles := append(result.IndexWithWorktree().PathList(), result.UntrackedPathList...)
+		if len(changedFiles) != 0 {
+			devHeadCommit, err := true_git.SyncSourceWorktreeWithServiceBranch(
+				context.Background(),
+				l.GitDir,
+				l.WorkTreeDir,
+				l.getRepoWorkTreeCacheDir(l.getRepoID()),
+				l.headCommit,
+				true_git.SyncSourceWorktreeWithServiceBranchOptions{
+					ServiceBranchPrefix: opts.ServiceBranchOptions.Prefix,
+					GlobIncludeList:     changedFiles,
+					GlobExcludeList:     opts.ServiceBranchOptions.GlobExcludeList,
+				},
+			)
+			if err != nil {
+				return l, err
+			}
+
+			l.headCommit = devHeadCommit
+		}
 	}
 
 	return l, nil
@@ -194,7 +203,7 @@ func (repo *Local) status(ctx context.Context) (*status.Result, error) {
 	defer repo.mutex.Unlock()
 
 	if repo.statusResult == nil {
-		result, err := status.Status(ctx, repo.WorkTreeDir)
+		result, err := status.Status(ctx, repo.WorkTreeDir, status.Options{UntrackedFilesMode: "all"})
 		if err != nil {
 			return nil, err
 		}
