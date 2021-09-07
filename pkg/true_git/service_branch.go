@@ -176,23 +176,17 @@ func addChangesToServiceWorktreeIndex(ctx context.Context, sourceWorktreeDir str
 
 func checkNewChangesInServiceWorktreeIndex(ctx context.Context, serviceWorktreeDir string) (bool, error) {
 	gitDiffArgs := []string{
-		"diff",
-		"--cached",
-		"--exit-code",
+		"status",
+		"-v",
+		"-s",
 	}
 
-	_, err := runGitCmd(ctx, gitDiffArgs, serviceWorktreeDir, runGitCmdOptions{})
-	if err == nil {
-		return false, nil
+	output, err := runGitCmd(ctx, gitDiffArgs, serviceWorktreeDir, runGitCmdOptions{})
+	if err != nil {
+		return false, err
 	}
 
-	if exitErr, ok := err.(*exec.ExitError); ok {
-		if exitErr.ExitCode() == 1 {
-			return true, nil
-		}
-	}
-
-	return false, err
+	return len(output.Bytes()) != 0, nil
 }
 
 func commitNewChangesInServiceBranch(ctx context.Context, serviceWorktreeDir string, branchName string) (string, error) {
